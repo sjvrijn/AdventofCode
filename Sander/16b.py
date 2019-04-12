@@ -1,13 +1,13 @@
 from copy import copy
 from collections import namedtuple
 
+
 opcodes = [
     'addr', 'addi', 'mulr', 'muli',
     'banr', 'bani', 'borr', 'bori',
     'setr', 'seti', 'gtir', 'gtri',
     'gtrr', 'eqir', 'eqri', 'eqrr',
 ]
-
 
 
 def elf_eval(instruction, A, B, C, registers): 
@@ -47,9 +47,8 @@ def elf_eval(instruction, A, B, C, registers):
         reg[C] = int(reg[A] == reg[B])
     else:
         raise ValueError(f"Invalid instruction '{instruction}'")
-	
-    return reg
 
+    return reg
 
 
 Case = namedtuple('Case', ['before', 'inst', 'after'])
@@ -59,7 +58,6 @@ with open('input16.txt') as f:
     cases = []
     before = next(f).strip()
     while 'Before:' in before:
-        #print(before, before[8:], eval(before[8:]))
         before = eval(before[8:])
         inst = tuple(map(int, next(f).split()))
         after = eval(next(f)[8:])
@@ -68,32 +66,41 @@ with open('input16.txt') as f:
         cases.append(Case(before, inst, after))
         before = next(f)
 
-
-from pprint import pprint
-#pprint(cases)
-
+    next(f)
+    program = [list(map(int, line.split())) for line in f]
 
 
 possible_opcodes = {i: [] for i in range(len(opcodes))}
-for case in cases[:5]:
+for case in cases:
     possible = set()
     for op in opcodes:
         if elf_eval(op, *case.inst[1:], case.before) == case.after:
             possible.add(op)
-    
     possible_opcodes[case.inst[0]].append(possible)
-    print(possible_opcodes)
 
-pprint(possible_opcodes)
-
-
-opcode_numbers = {i: possible_opcodes[i][0].intersection(*possible_opcodes[i][1:]) for i in range(len(opcodes))}
-
-
-
+# Sanity check, although apparently not actually needed: take intersection
+for i, ops in possible_opcodes.items():
+    if len(ops) == 1:
+        possible_opcodes[i] = ops[0]
+    else:
+        possible_opcodes[i] = ops[0].intersection(*ops[1:])
 
 
-print(opcode_numbers)
+indexed_opcodes = {i: None for i in range(len(opcodes))}
+while possible_opcodes:
+    for i, ops in possible_opcodes.items():
+        if len(ops) == 1:
+            op = list(ops)[0]
+            indexed_opcodes[i] = op
+            break
+    for ops in possible_opcodes.values():
+        ops.discard(op)
+    del possible_opcodes[i]
 
 
+registers = [0, 0, 0, 0]
 
+for instruction, A, B, C in program:
+    registers = elf_eval(indexed_opcodes[instruction], A, B, C, registers)
+
+print(registers)

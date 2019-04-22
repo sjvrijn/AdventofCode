@@ -68,15 +68,15 @@ class Cart:
 
 
 with open('input13.txt') as f:
-    map = np.array([[c for c in line.strip('\n')] for line in f])
+    tracks = np.array([[c for c in line.strip('\n')] for line in f])
 
-carts = [Cart(x, y, '>') for x,y in np.argwhere(map == '>')]
-carts.extend([Cart(x, y, '<') for x,y in np.argwhere(map == '<')])
-carts.extend([Cart(x, y, '^') for x,y in np.argwhere(map == '^')])
-carts.extend([Cart(x, y, 'v') for x,y in np.argwhere(map == 'v')])
+carts = [Cart(x, y, '>') for x,y in np.argwhere(tracks == '>')]
+carts.extend([Cart(x, y, '<') for x,y in np.argwhere(tracks == '<')])
+carts.extend([Cart(x, y, '^') for x,y in np.argwhere(tracks == '^')])
+carts.extend([Cart(x, y, 'v') for x,y in np.argwhere(tracks == 'v')])
 
 for cart in carts:
-    map[cart.x, cart.y] = mapfix[cart.direction]
+    tracks[cart.x, cart.y] = mapfix[cart.direction]
 
 while len(carts) > 1:
     carts.sort()
@@ -92,13 +92,13 @@ while len(carts) > 1:
                 to_remove.append(c)
                 break
         else:
-            if map[cart.x, cart.y] == '+':
+            if tracks[cart.x, cart.y] == '+':
                 cart.intersection()
 
-            elif map[cart.x, cart.y] in ['/', '\\']:
-                cart.corner(map[cart.x, cart.y])
+            elif tracks[cart.x, cart.y] in ['/', '\\']:
+                cart.corner(tracks[cart.x, cart.y])
 
-            elif map[cart.x, cart.y] == ' ':
+            elif tracks[cart.x, cart.y] == ' ':
                 print(f'Cart left the rails at {cart.x},{cart.y}')
                 sys.exit()
 

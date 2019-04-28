@@ -1,8 +1,6 @@
 import numpy as np
-import time
 from functools import total_ordering
 from itertools import product
-from operator import attrgetter
 
 
 np.set_printoptions(edgeitems=20, linewidth=200)
@@ -19,14 +17,16 @@ class Creature:
     strength = 3
     hitpoints = 200
 
-    def __init__(self, kind, x, y):
+    def __init__(self, kind, x, y, verbose=False):
         self.kind = kind
         self.hunts = who_hunts_who[kind]
         self.x = x
         self.y = y
+        self.verbose = verbose
 
     def hit_neighbor(self, neighbors):
-        target = min([n for n in neighbors], key=attrgetter('hitpoints'))
+        min_neighbor_hp = min(n.hitpoints for n in neighbors)
+        target = [n for n in sorted(neighbors) if n.hitpoints == min_neighbor_hp][0]
         self.hit(target)
         return target
 
@@ -34,13 +34,15 @@ class Creature:
         if self.kind == other.kind:
             raise Exception(f"Bad {self.kind}, don't hit your own kind!")
         other.hitpoints -= self.strength
-        print(f'{self} hits {other.kind} for {self.strength}, which now has {other.hitpoints} HP left')
+        if self.verbose:
+            print(f'{self} hits {other} for {self.strength}')
 
     def isneighborof(self, other):
         return abs(self.x - other.x) + abs(self.y - other.y) == 1
 
     def move(self, direction):
-        print(f'{self} moves {direction}')
+        if self.verbose:
+            print(f'{self} moves {direction}')
         if direction == 'up':
             self.x -= 1
         elif direction == 'down':
@@ -70,12 +72,14 @@ class Creature:
 
 class Cave:
 
-    def __init__(self, file_in):
+    def __init__(self, file_in, verbose=False):
+        self.verbose = verbose
+
         with open(file_in) as f:
             self._cave = np.array([[c for c in line.strip('\n')] for line in f])
 
         self.all_creatures = {
-            kind: [Creature(kind, a, b) for a, b in np.argwhere(self._cave == kind)]
+            kind: [Creature(kind, a, b, verbose=verbose) for a, b in np.argwhere(self._cave == kind)]
             for kind in ['E', 'G']
         }
 
@@ -95,6 +99,8 @@ class Cave:
     def kill(self, creature):
         try:
             self.all_creatures[creature.kind].remove(creature)
+            if self.verbose:
+                print(f'{creature} killed')
         except:
             pass  # already dead
 
@@ -131,68 +137,76 @@ class Cave:
             disp[c.x, c.y] = c.kind
         for line in disp:
             print(''.join(line))
-        # print('\n')
 
 
-cave = Cave('input15__.txt')
+cases = ['input15_{i}.txt'.format(i=i) for i in 'abcde']
+# cases = ['input15.txt']
+verbose = False
 
-full_rounds = 0
-ended_intermediately = False
-while not cave.isfinished():
+for case in cases:
+    cave = Cave(case, verbose=verbose)
 
-    print(f'\nRound: {full_rounds} [{len(cave.creatures)} creatures, {sum(c.hitpoints for c in cave.creatures)} HP]')
-    cave.display()
+    full_rounds = 0
+    ended_intermediately = False
+    while not cave.isfinished():
+        if verbose:
+            print(f'\nRound: {full_rounds} [{len(cave.creatures)} creatures, {sum(c.hitpoints for c in cave.creatures)} HP]')
+
+        d = {'E': None, 'G': None}
+        has_moved = True
+
+        for c in cave.creatures:
+            if cave.isfinished():
+                ended_intermediately = True
+
+            if c.hitpoints <= 0:
+                cave.kill(c)
+                continue
+
+            if d[c.kind] is None or has_moved:
+                d[c.kind] = cave.fill_dists_to(c.hunts)
+                has_moved = False
+
+            dist = d[c.kind]
+
+            steps = [dist[c.x - 1, c.y], dist[c.x, c.y - 1],
+                     dist[c.x, c.y + 1], dist[c.x + 1, c.y]]
+
+            least_steps = np.nanmin(steps)
+
+            if least_steps != np.inf and least_steps > 0:
+                has_moved = True
+                if least_steps == steps[0]:
+                    c.move('up')
+                elif least_steps == steps[1]:
+                    c.move('left')
+                elif least_steps == steps[2]:
+                    c.move('right')
+                else:
+                    c.move('down')
 
 
-    d = {'E': None, 'G': None}
-    has_moved = {'E': True, 'G': True}
+            neighbors = [neighbor
+                         for neighbor in cave.all_creatures[c.hunts]
+                         if c.isneighborof(neighbor)]
 
-    for c in cave.creatures:
-        if cave.isfinished():
-            ended_intermediately = True
+            if neighbors:
+                neighbor = c.hit_neighbor(neighbors)
+                if neighbor.hitpoints <= 0:
+                    cave.kill(neighbor)
 
-        if c.hitpoints <= 0:
-            cave.kill(c)
-            continue
+            if verbose:
+                cave.display()
+                print()
+        full_rounds += 1
 
-        if has_moved[who_hunts_who[c.kind]]:
-            d[c.kind] = cave.fill_dists_to(c.hunts)
-            has_moved[c.hunts] = False
+    hp_sum = sum(c.hitpoints for c in cave.creatures)
+    if ended_intermediately:
+        full_rounds -= 1
 
-        dist = d[c.kind]
-        steps = [dist[c.x - 1, c.y], dist[c.x, c.y - 1],
-                 dist[c.x, c.y + 1], dist[c.x + 1, c.y]]
-        least_steps = np.nanmin(steps)
+    if verbose:
+        cave.display()
+        for c in cave.creatures:
+            print(c)
 
-        if least_steps != np.inf and least_steps > 0:
-            has_moved[c.kind] = True
-            if least_steps == steps[0]:
-                c.move('up')
-            elif least_steps == steps[1]:
-                c.move('left')
-            elif least_steps == steps[2]:
-                c.move('right')
-            else:
-                c.move('down')
-
-
-        neighbors = [neighbor
-                     for neighbor in cave.all_creatures[c.hunts]
-                     if c.isneighborof(neighbor)]
-
-        if neighbors:
-            neighbor = c.hit_neighbor(neighbors)
-            if neighbor.hitpoints <= 0:
-                cave.kill(neighbor)
-
-    full_rounds += 1
-
-hp_sum = sum(c.hitpoints for c in cave.creatures)
-if ended_intermediately:
-    full_rounds -= 1
-
-cave.display()
-for c in cave.creatures:
-    print(c)
-
-print(full_rounds, hp_sum, full_rounds*hp_sum)
+    print(full_rounds, hp_sum, full_rounds*hp_sum)

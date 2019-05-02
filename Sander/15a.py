@@ -17,12 +17,11 @@ class Creature:
     strength = 3
     hitpoints = 200
 
-    def __init__(self, kind, x, y, verbose=False):
+    def __init__(self, kind, x, y):
         self.kind = kind
         self.hunts = who_hunts_who[kind]
         self.x = x
         self.y = y
-        self.verbose = verbose
 
     def hit_neighbor(self, neighbors):
         min_neighbor_hp = min(n.hitpoints for n in neighbors)
@@ -34,15 +33,11 @@ class Creature:
         if self.kind == other.kind:
             raise Exception(f"Bad {self.kind}, don't hit your own kind!")
         other.hitpoints -= self.strength
-        if self.verbose:
-            print(f'{self} hits {other} for {self.strength}')
 
     def isneighborof(self, other):
         return abs(self.x - other.x) + abs(self.y - other.y) == 1
 
     def move(self, direction):
-        if self.verbose:
-            print(f'{self} moves {direction}')
         if direction == 'up':
             self.x -= 1
         elif direction == 'down':
@@ -72,14 +67,13 @@ class Creature:
 
 class Cave:
 
-    def __init__(self, file_in, verbose=False):
-        self.verbose = verbose
+    def __init__(self, file_in):
 
         with open(file_in) as f:
             self._cave = np.array([[c for c in line.strip('\n')] for line in f])
 
         self.all_creatures = {
-            kind: [Creature(kind, a, b, verbose=verbose) for a, b in np.argwhere(self._cave == kind)]
+            kind: [Creature(kind, a, b) for a, b in np.argwhere(self._cave == kind)]
             for kind in ['E', 'G']
         }
 
@@ -99,8 +93,6 @@ class Cave:
     def kill(self, creature):
         try:
             self.all_creatures[creature.kind].remove(creature)
-            if self.verbose:
-                print(f'{creature} killed')
         except:
             pass  # already dead
 
@@ -139,21 +131,23 @@ class Cave:
             print(''.join(line))
 
 
-cases = ['input15_{i}.txt'.format(i=i) for i in 'abcde']
-# cases = ['input15.txt']
-verbose = False
+cases = ['input15.txt']
+verbose = True
 
 for case in cases:
-    cave = Cave(case, verbose=verbose)
+    cave = Cave(case)
 
     full_rounds = 0
     ended_intermediately = False
+
     while not cave.isfinished():
+
         if verbose:
-            print(f'\nRound: {full_rounds} [{len(cave.creatures)} creatures, {sum(c.hitpoints for c in cave.creatures)} HP]')
+            print(f'\nRound: {full_rounds+1} [{len(cave.creatures)} creatures, {sum(c.hitpoints for c in cave.creatures)} HP]')
+            print('----------------------------------------------------------------------------------')
 
         d = {'E': None, 'G': None}
-        has_moved = True
+        locations_changed = True
 
         for c in cave.creatures:
             if cave.isfinished():
@@ -161,11 +155,13 @@ for case in cases:
 
             if c.hitpoints <= 0:
                 cave.kill(c)
+                locations_changed = True
                 continue
 
-            if d[c.kind] is None or has_moved:
+            if locations_changed or d[c.kind] is None:
                 d[c.kind] = cave.fill_dists_to(c.hunts)
-                has_moved = False
+                d[c.hunts] = cave.fill_dists_to(c.kind)
+                locations_changed = False
 
             dist = d[c.kind]
 
@@ -175,7 +171,7 @@ for case in cases:
             least_steps = np.nanmin(steps)
 
             if least_steps != np.inf and least_steps > 0:
-                has_moved = True
+                locations_changed = True
                 if least_steps == steps[0]:
                     c.move('up')
                 elif least_steps == steps[1]:
@@ -194,10 +190,8 @@ for case in cases:
                 neighbor = c.hit_neighbor(neighbors)
                 if neighbor.hitpoints <= 0:
                     cave.kill(neighbor)
+                    locations_changed = True
 
-            if verbose:
-                cave.display()
-                print()
         full_rounds += 1
 
     hp_sum = sum(c.hitpoints for c in cave.creatures)
@@ -206,7 +200,5 @@ for case in cases:
 
     if verbose:
         cave.display()
-        for c in cave.creatures:
-            print(c)
 
     print(full_rounds, hp_sum, full_rounds*hp_sum)

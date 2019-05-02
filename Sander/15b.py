@@ -14,14 +14,15 @@ who_hunts_who = {
 @total_ordering
 class Creature:
 
-    strength = 3
+    default_strength = 3
     hitpoints = 200
 
-    def __init__(self, kind, x, y):
+    def __init__(self, kind, x, y, strength=None):
         self.kind = kind
         self.hunts = who_hunts_who[kind]
         self.x = x
         self.y = y
+        self.strength = strength if strength else self.default_strength
 
     def hit_neighbor(self, neighbors):
         min_neighbor_hp = min(n.hitpoints for n in neighbors)
@@ -67,15 +68,15 @@ class Creature:
 
 class Cave:
 
-    def __init__(self, file_in, verbose=False):
+    def __init__(self, file_in, elf_strength=3, verbose=False):
 
         self.verbose = verbose
         with open(file_in) as f:
             self._cave = np.array([[c for c in line.strip('\n')] for line in f])
 
         self.all_creatures = {
-            kind: [Creature(kind, a, b) for a, b in np.argwhere(self._cave == kind)]
-            for kind in ['E', 'G']
+            kind: [Creature(kind, a, b, strength) for a, b in np.argwhere(self._cave == kind)]
+            for kind, strength in [('E', elf_strength), ('G', None)]
         }
 
         for c in self.creatures:
@@ -132,13 +133,13 @@ class Cave:
             print(''.join(line))
 
 
-    def simulate(self):
-        full_rounds = 0
+    def simulate(self, allow_elf_death=True):
+        n_rounds = 0
         ended_intermediately = False
         while not self.isfinished():
 
             if self.verbose:
-                print(f'\nRound: {full_rounds + 1} [{len(self.creatures)} creatures, {sum(c.hitpoints for c in self.creatures)} HP]')
+                print(f'\nRound: {n_rounds + 1} [{len(self.creatures)} creatures, {sum(c.hitpoints for c in self.creatures)} HP]')
                 print('----------------------------------------------------------------------------------')
 
             d = {'E': None, 'G': None}
@@ -149,6 +150,8 @@ class Cave:
                     ended_intermediately = True
 
                 if c.hitpoints <= 0:
+                    if not allow_elf_death and c.kind == 'E':
+                        raise Exception('An elf died while this was not allowed')
                     self.kill(c)
                     locations_changed = True
                     continue
@@ -183,24 +186,31 @@ class Cave:
                 if neighbors:
                     neighbor = c.hit_neighbor(neighbors)
                     if neighbor.hitpoints <= 0:
+                        if not allow_elf_death and neighbor.kind == 'E':
+                            raise Exception('An elf died while this was not allowed')
                         self.kill(neighbor)
                         locations_changed = True
 
-            full_rounds += 1
+            n_rounds += 1
 
         if ended_intermediately:
-            full_rounds -= 1
+            n_rounds -= 1
         if verbose:
             self.display()
 
-        return full_rounds, sum(c.hitpoints for c in self.creatures)
+        return n_rounds, sum(c.hitpoints for c in self.creatures)
 
 
 
-verbose = True
+verbose = False
 
-for strength in count(4):
-    cave = Cave('input15.txt')
-
-    full_rounds, hp_sum = cave.simulate()
+for elf_strength in count(4):
+    print(elf_strength)
+    cave = Cave('input15.txt', elf_strength=elf_strength)
+    try:
+        full_rounds, hp_sum = cave.simulate(allow_elf_death=False)
+    except Exception as e:
+        print(e)
+        continue
     print(full_rounds, hp_sum, full_rounds*hp_sum)
+    break

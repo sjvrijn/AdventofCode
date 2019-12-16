@@ -1,12 +1,34 @@
+from enum import IntEnum
+
+
+class Opcode(IntEnum):
+    ADD = 1
+    MUL = 2
+    INPUT = 3
+    OUTPUT = 4
+    JMP_NZ = 5
+    JMP_Z = 6
+    LT = 7
+    EQ = 8
+    MV_REL= 9
+    BREAK = 99
+
+
+class Mode(IntEnum):
+    POS = 0  # ITION
+    IMM = 1  # EDIATE
+    REL = 2  # ATIVE
+
+
 def get_value(program, addr, mode, rel_base, verbose=False):
     if verbose:
         print(f"addr: {addr}, mode: {mode}, rel_base: {rel_base}")
 
-    if mode == 0:
+    if mode == Mode.POS:
         return load_safe(program, addr)
-    elif mode == 1:
+    elif mode == Mode.IMM:
         return addr
-    elif mode == 2:
+    elif mode == Mode.REL:
         return load_safe(program, addr+rel_base)
     else:
         raise ValueError(f"Invalid mode '{mode}'")
@@ -23,9 +45,9 @@ def load_safe(program, addr, fill_val=0):
 
 
 def write_safe(program, addr, value, mode, rel_base, fill_val=0):
-    if mode == 2:
+    if mode == Mode.REL:
         addr += rel_base
-    elif mode == 1:
+    elif mode == Mode.IMM:
         raise ValueError('Write address may never be in mode 1')
 
     if addr < 0:
@@ -38,12 +60,12 @@ def write_safe(program, addr, value, mode, rel_base, fill_val=0):
     program[addr] = value
 
 
-def intcode(program, inputs=None, print_out=False, verbose=False):
+def intcode(program, inputs=None, verbose=False):
     pc = 0  # program counter
     rel_base = 0
     opcode = program[pc]
 
-    while opcode != 99:
+    while opcode != Opcode.BREAK:
         if verbose:
             print(f"opcode: {opcode}, pc: {pc}")
         modes, opcode = divmod(opcode, 100)
@@ -51,7 +73,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
         modes, mode2 = divmod(modes, 10)
         _, mode3 = divmod(modes, 10)
 
-        if opcode == 1:
+        if opcode == Opcode.ADD:
             addr1, addr2, addr3 = program[pc + 1:pc + 4]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -67,7 +89,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             write_safe(program, addr3, val1+val2, mode3, rel_base)
             pc += 4
 
-        elif opcode == 2:
+        elif opcode == Opcode.MUL:
             addr1, addr2, addr3 = program[pc + 1:pc + 4]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -83,7 +105,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             write_safe(program, addr3, val1*val2, mode3, rel_base)
             pc += 4
 
-        elif opcode == 3:
+        elif opcode == Opcode.INPUT:
             addr1 = program[pc + 1]
             if inputs:
                 in_value = inputs.pop(0)
@@ -93,16 +115,15 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             write_safe(program, addr1, in_value, mode1, rel_base)
             pc += 2
 
-        elif opcode == 4:
+        elif opcode == Opcode.OUTPUT:
             addr1 = program[pc + 1]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
-            if print_out:
+            if verbose:
                 print(val1)
-            else:
-                yield val1
+            yield val1
             pc += 2
 
-        elif opcode == 5:
+        elif opcode == Opcode.JMP_NZ:
             addr1, addr2 = program[pc + 1:pc + 3]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -111,7 +132,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             else:
                 pc += 3
 
-        elif opcode == 6:
+        elif opcode == Opcode.JMP_Z:
             addr1, addr2 = program[pc + 1:pc + 3]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -120,7 +141,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             else:
                 pc += 3
 
-        elif opcode == 7:
+        elif opcode == Opcode.LT:
             addr1, addr2, addr3 = program[pc + 1:pc + 4]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -131,7 +152,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             write_safe(program, addr3, outcome, mode3, rel_base)
             pc += 4
 
-        elif opcode == 8:
+        elif opcode == Opcode.EQ:
             addr1, addr2, addr3 = program[pc + 1:pc + 4]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             val2 = get_value(program, addr2, mode2, rel_base, verbose=verbose)
@@ -142,13 +163,13 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             write_safe(program, addr3, outcome, mode3, rel_base)
             pc += 4
 
-        elif opcode == 9:
+        elif opcode == Opcode.MV_REL:
             addr1 = program[pc + 1]
             val1 = get_value(program, addr1, mode1, rel_base, verbose=verbose)
             rel_base += val1
             pc += 2
 
-        elif opcode == 99:
+        elif opcode == Opcode.BREAK:
             if verbose:
                 print('BREAK')
             break
@@ -157,8 +178,6 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             raise ValueError(f"Invalid opcode '{opcode}' encountered at pc {pc}.")
 
         opcode = program[pc]
-        if pc > 200:
-            pass
         if verbose:
             print()
 

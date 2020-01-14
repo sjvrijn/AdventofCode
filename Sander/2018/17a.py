@@ -1,25 +1,37 @@
+from enum import IntEnum
+
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-xmax, ymax = 1001, 1850
-### CONSTANTS ###
-# blocks
-WATER = 0
-CLAY = 1
-# directions
-LEFT = -1
-RIGHT = 1
-# return codes
-OFF_MAP = 0
-HITWALL = 1
 
+class SoilType(IntEnum):
+    DRY     = 0
+    FLOWING = 1
+    STILL   = 2
+    CLAY    = 3
+
+
+class Direction(IntEnum):
+    LEFT  = -1
+    DOWN  =  0
+    RIGHT =  1
+
+
+class ReturnCode(IntEnum):
+    OFF_MAP        = 0
+    HIT_WALL       = 1
+    JOINED_WATER   = 2
+    REACHED_SOURCE = 3
+
+
+xmax, ymax = 1001, 1850
 # plotting helpers
-plot_start = 2320
-plot_interval = 5
+plot_start = 0
+plot_interval = 250
 disp_dpi = 50
-disp_range = (slice(0, 1820, 1), slice(250, 700, 1))
+disp_range = (slice(3, 1802, 1), slice(0, 1000, 1))
 save_format = 'png'
 
 x_disp, y_disp = (disp_range[1].stop - disp_range[1].start,
@@ -29,40 +41,39 @@ coords = []
 with open('input17.txt') as f:
     for line in f:
         a, b = line.split(', ')
-        axis_a, val = a.split('=')
-        val = int(val)
+        axis_a, val1 = a.split('=')
+        val1 = int(val1)
         axis_b, vals = b.split('=')
-        vals = slice(*list(map(int, vals.split('..'))))
+        val2, val3 = list(map(int, vals.split('..')))
+        vals = slice(val2, val3+1)
 
         if axis_a == 'y':
-            coords.append((val, vals))
+            coords.append((val1, vals))
         else:
-            coords.append((vals, val))
+            coords.append((vals, val1))
 
-ground = np.full((ymax, xmax), fill_value=np.nan)
-source = (0, 500)
-
+ground = np.full((ymax, xmax), fill_value=SoilType.DRY)
 for c in coords:
-    ground[c] = CLAY
-ymax = np.max((ground == CLAY).nonzero()[0])
+    ground[c] = SoilType.CLAY
 
-ground[source] = WATER
+ymin = np.min((ground == SoilType.CLAY).nonzero()[0])
+ymax = np.max((ground == SoilType.CLAY).nonzero()[0])
 
-plt.figure(figsize=((xmax/disp_dpi)+1, (ymax/disp_dpi)+1))
-plt.imshow(ground[disp_range], cmap='viridis')
-plt.tight_layout()
-plt.savefig('17a_init.{}'.format(save_format))
+source = (0, 500)
+ground[source] = SoilType.FLOWING
 
 count = 0
 
-def recursive_dinges(source, direction):
+
+def recursive_dinges(source, direction, verbose=False):
     y, x = source
 
     global count
     global ground
 
-    print(count)
-    if count >= plot_start and count % plot_interval == 0:
+    if verbose:
+        print(count)
+    if count >= plot_start and count % plot_interval == 0 and verbose:
         plt.imshow(ground[disp_range], cmap='viridis_r')
         plt.tight_layout()
         plt.savefig('17a-step-{}.{}'.format(count, save_format))
@@ -71,80 +82,90 @@ def recursive_dinges(source, direction):
     count += 1
 
     # Flow sideways
-    if direction != 0:
+    if direction != Direction.DOWN:
         while x in range(0, xmax):
-            if ground[y, x] == CLAY:
-                dir_txt = 'left' if direction == LEFT else 'right'
-                #print("hit wall: {}".format(dir_txt))
-                return HITWALL
-            ground[y, x] = WATER
+            if ground[y, x] == SoilType.CLAY:
+                if verbose:
+                    dir_txt = 'left' if direction == Direction.LEFT else 'right'
+                    print("hit wall: {}".format(dir_txt))
+                return ReturnCode.HIT_WALL, x - direction
 
-            if np.isnan(ground[y+1, x]):
-                break
+            ground[y, x] = SoilType.FLOWING
+
+            if ground[y+1, x] == SoilType.DRY:
+                ret, _ = recursive_dinges((y, x), direction=Direction.DOWN, verbose=verbose)
+                if ret == ReturnCode.OFF_MAP or ret == ReturnCode.JOINED_WATER:
+                    if verbose:
+                        print("off map (recursive, down flow)")
+                    return ReturnCode.OFF_MAP, None
+                else:
+                    if verbose:
+                        print("Checking if dry soil is now still:")
+                        print(ground[y+1, x] == SoilType.STILL)
             x += direction
 
     # Flow down
-    while np.isnan(ground[y+1, x]):
+    while ground[y+1, x] == SoilType.DRY:
         y += 1
-        ground[y, x] = WATER
-        if y > ymax:
-            print("off map (going down)")
-            return OFF_MAP
+        ground[y, x] = SoilType.FLOWING
+        if y >= ymax:
+            if verbose:
+                print("off map (going down)")
+            return ReturnCode.OFF_MAP, None
+
+    if ground[y+1, x] == SoilType.FLOWING:
+        if verbose:
+            print("Joined already flowing water, I'm done here")
+        return ReturnCode.JOINED_WATER, None
 
     # Flow splits & moves up while contained
     done = False
     while not done:
-        val1 = recursive_dinges((y, x+LEFT), LEFT)
-        val2 = recursive_dinges((y, x+RIGHT), RIGHT)
+        ret1, x1 = recursive_dinges((y, x+Direction.LEFT), Direction.LEFT,
+                                    verbose=verbose)
+        ret2, x2 = recursive_dinges((y, x+Direction.RIGHT), Direction.RIGHT,
+                                    verbose=verbose)
 
-        if val1 == HITWALL and val2 == HITWALL:
-            print("moving up")
+        if ret1 == ReturnCode.HIT_WALL and ret2 == ReturnCode.HIT_WALL:
+            if verbose:
+                print("moving up")
+            ground[y, x1:x2+1] = SoilType.STILL
             y -= 1
+            if y == source[0]:
+                return ReturnCode.REACHED_SOURCE, None
         else:
             done = True
 
-    print("off map (recursive)")
-    return OFF_MAP
+    if verbose:
+        print("off map (recursive)")
+    return ReturnCode.OFF_MAP, None
 
 
-recursive_dinges(source, 0)
-print(np.sum(ground == WATER))
+verbose = False
+
+if verbose:
+    plt.figure(figsize=((xmax/disp_dpi)+1, (ymax/disp_dpi)+1))
+    plt.imshow(ground[disp_range], cmap='viridis')
+    plt.tight_layout()
+    plt.savefig('17a_init.{}'.format(save_format))
+
+recursive_dinges(source, Direction.DOWN, verbose=verbose)
+
+if verbose:
+    plt.imshow(ground[disp_range], cmap='viridis_r')
+    plt.tight_layout()
+    plt.savefig('17a-final.{}'.format(save_format))
 
 
-
-#counter = 0
-#while sources and counter < 10:
-#    counter += 1
-#    y, x = sources.pop(0)
-#    print("checking source {}, {}...".format(y, x))
-#    print("dropping down")
-#    for y_idx in range(y+1, ymax):
-#        if ground[y_idx, x] == CLAY:
-#            break
-#        else:
-#            ground[y_idx, x] = WATER
-#    y = y_idx-1
-#
-#    print("going right")
-#    for x_idx in range(x+1, xmax):
-#        if ground[y, x_idx] == CLAY:
-#            break
-#        else:
-#            ground[y, x_idx] = WATER
-#
-#        if ground[y+1, x_idx] != CLAY:
-#            sources.append((y, x_idx))
-#            break
-#
-#    print("going left")
-#    for x_idx in range(x-1, 0, -1):
-#        if ground[y, x_idx] == CLAY:
-#            break
-#        else:
-#            ground[y, x_idx] = WATER
-#
-#        if ground[y+1, x_idx] != CLAY:
-#            sources.append((y, x_idx))
-#            break
+clay_count = np.sum(ground == SoilType.CLAY, axis=1)
 
 
+print(ymin, ymax)
+water_count = ground[ymin:ymax+1]
+
+print("Amount of water in ground:")
+print(np.sum(water_count == SoilType.FLOWING) +
+      np.sum(water_count == SoilType.STILL))
+
+print("Amount of still water in ground:")
+print(np.sum(water_count == SoilType.STILL))

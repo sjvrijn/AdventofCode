@@ -48,6 +48,10 @@ class Tunnel:
         ])
 
 
+    def reset_map(self):
+        self.map[self.map != Tunnel.WALL] = Tunnel.SPACE
+        self.map[self.entrance] = Tunnel.ENTRANCE
+
     @staticmethod
     def _numify(n: str) -> Number:
         if n == '.':
@@ -59,8 +63,8 @@ class Tunnel:
         return Tunnel.SPACE
 
 
-    def flood_fill(self, start=None, enable_visuals=False):
-        start = start if start is not None else Point(*self.entrance)
+    def flood_fill(self, start=None, goal='', *, enable_visuals=False) -> int:
+        start = start if start is not None else self.entrance
         front = [start]
         dist = 0
 
@@ -77,10 +81,15 @@ class Tunnel:
                         self.map[new_point] = dist
                         new_front.append(new_point)
 
+                        if self.orig_map[new_point.x][new_point.y] == goal:
+                            return dist
+
             if enable_visuals:
                 self.show(title=f'Distance: {dist}')
 
             front = new_front
+
+        return dist
 
 
     def is_filled(self):
@@ -110,6 +119,8 @@ def test_1():
 
     tunnels = Tunnel(orig_tunnels)
     tunnels.flood_fill(enable_visuals=True)
+    tunnels.reset_map()
+    tunnels.show()
 
     _ = input('Done, press any key to finish...')
     plt.close()
@@ -160,6 +171,7 @@ def main():
 
 
 if __name__ == '__main__':
+    np.set_printoptions(linewidth=200, edgeitems=20)
     test_1()
     test_2()
     test_3()

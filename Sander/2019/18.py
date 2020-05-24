@@ -1,6 +1,8 @@
 from collections import namedtuple
-from string import ascii_uppercase
+from itertools import product
 from numbers import Number
+from string import ascii_uppercase
+from typing import Tuple, Union
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,7 +66,7 @@ class Tunnel:
         return Tunnel.SPACE
 
 
-    def flood_fill(self, start=None, goal='') -> int:
+    def flood_fill(self, start=None, goal='') -> Union[int, Tuple[Point, int]]:
         start = start if start is not None else self.entrance
         front = [start]
         dist = 0
@@ -72,26 +74,25 @@ class Tunnel:
         if self.enable_visuals:
             self.show(title=f'Distance: {dist}')
 
-        goal_found = False
+        goal_found_at = None
 
         while front:
             dist += 1
             new_front = []
-            for point in front:
-                for d in directions:
-                    new_point = point + d
-                    if self.is_point_free(new_point):
-                        self.map[new_point] = dist
-                        new_front.append(new_point)
+            for point, d in product(front, directions):
+                new_point = point + d
+                if self.is_point_free(new_point):
+                    self.map[new_point] = dist
+                    new_front.append(new_point)
 
-                        if self.orig_map[new_point.x][new_point.y] == goal:
-                            goal_found = True
+                    if self.orig_map[new_point.x][new_point.y] == goal:
+                        goal_found_at = new_point
 
             if self.enable_visuals:
                 self.show(title=f'Distance: {dist}')
 
-            if goal_found:
-                return dist
+            if goal_found_at:
+                return goal_found_at, dist
 
             front = new_front
 

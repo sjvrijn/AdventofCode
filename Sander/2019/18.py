@@ -1,5 +1,5 @@
 from collections import namedtuple
-from string import ascii_letters
+from string import ascii_uppercase
 from numbers import Number
 
 import numpy as np
@@ -26,17 +26,14 @@ class Tunnel:
     SPACE = 0       # '.'
     VISITED = -1
 
-    def __init__(self, orig_tunnels, enable_visuals=False):
+    def __init__(self, orig_tunnels, blocking=ascii_uppercase, enable_visuals=False):
+        self.blocking = blocking
         self.enable_visuals = enable_visuals
         self.orig_map = orig_tunnels
         self.map = self._parse_map(orig_tunnels)
         self.max_x, self.max_y = self.map.shape
         self.entrance = Point(*np.argwhere(self.map == self.ENTRANCE)[0])
         self.img = None
-
-
-    def is_point_valid(self, p: Point) -> bool:
-        return 0 <= p.x <= self.max_x and 0 <= p.y <= self.max_y
 
 
     def _parse_map(self, orig_map):
@@ -75,29 +72,40 @@ class Tunnel:
         if self.enable_visuals:
             self.show(title=f'Distance: {dist}')
 
-        while not self.is_filled():
+        goal_found = False
+
+        while front:
             dist += 1
             new_front = []
             for point in front:
                 for d in directions:
                     new_point = point + d
-                    if self.is_point_valid(new_point) and self.map[new_point] == Tunnel.SPACE:
+                    if self.is_point_free(new_point):
                         self.map[new_point] = dist
                         new_front.append(new_point)
 
                         if self.orig_map[new_point.x][new_point.y] == goal:
-                            return dist
+                            goal_found = True
 
             if self.enable_visuals:
                 self.show(title=f'Distance: {dist}')
+
+            if goal_found:
+                return dist
 
             front = new_front
 
         return dist
 
 
-    def is_filled(self):
-        return np.sum(self.map == Tunnel.SPACE) == 0
+    def is_point_free(self, p: Point) -> bool:
+        try:
+            is_free = self.map[p] == Tunnel.SPACE
+            is_blocked = self.orig_map[p.x][p.y] in self.blocking
+        except IndexError as e:
+            print(e)
+            return False
+        return is_free and not is_blocked
 
 
     def show(self, *, title=''):
@@ -122,8 +130,8 @@ def test_1():
 ########################""".splitlines()
 
     tunnels = Tunnel(orig_tunnels, enable_visuals=True)
-    tunnels.flood_fill()
-    tunnels.reset_map()
+    print(tunnels.flood_fill())
+
 
     _ = input('Done, press any key to finish...')
     plt.close()

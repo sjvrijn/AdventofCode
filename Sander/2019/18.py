@@ -1,7 +1,8 @@
 from collections import namedtuple
+from copy import copy
 from itertools import product
 from numbers import Number
-from string import ascii_uppercase
+from string import ascii_lowercase, ascii_uppercase
 from typing import Tuple, Union
 
 import numpy as np
@@ -66,8 +67,9 @@ class Tunnel:
         return Tunnel.SPACE
 
 
-    def flood_fill(self, start=None, goal='') -> Union[int, Tuple[Point, int]]:
-        start = start if start is not None else self.entrance
+    def flood_fill(self, start=None, goal='') -> Tuple[Union[Point, None], int]:
+        if start is None:
+            start = self.entrance
         front = [start]
         dist = 0
 
@@ -96,7 +98,7 @@ class Tunnel:
 
             front = new_front
 
-        return dist
+        return None, dist
 
 
     def is_point_free(self, p: Point) -> bool:
@@ -128,10 +130,14 @@ def test_1():
 #...............b.C.D.f#
 #.######################
 #.....@.a.B.c.d.A.e.F.g#
-########################""".splitlines()
+########################"""
 
-    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
-    print(tunnels.flood_fill())
+    all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
+
+    for key in all_keys:
+        print(tunnels.flood_fill(goal=key))
+        tunnels.reset_map()
 
 
     _ = input('Done, press any key to finish...')
@@ -147,9 +153,9 @@ def test_2():
 #k.E..a...g..B.n#
 ########.########
 #l.F..d...h..C.m#
-#################""".splitlines()
+#################"""
 
-    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
     tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')
@@ -162,9 +168,9 @@ def test_3():
 ###d#e#f################
 ###A#B#C################
 ###g#h#i################
-########################""".splitlines()
+########################"""
 
-    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
     tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')
@@ -173,9 +179,9 @@ def test_3():
 
 def main():
     with open('input18.txt') as f:
-        orig_tunnels = f.readlines()
+        orig_tunnels = f.read()
 
-    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
     tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')

@@ -26,7 +26,8 @@ class Tunnel:
     SPACE = 0       # '.'
     VISITED = -1
 
-    def __init__(self, orig_tunnels):
+    def __init__(self, orig_tunnels, enable_visuals=False):
+        self.enable_visuals = enable_visuals
         self.orig_map = orig_tunnels
         self.map = self._parse_map(orig_tunnels)
         self.max_x, self.max_y = self.map.shape
@@ -52,6 +53,9 @@ class Tunnel:
         self.map[self.map != Tunnel.WALL] = Tunnel.SPACE
         self.map[self.entrance] = Tunnel.ENTRANCE
 
+        if self.enable_visuals:
+            self.show()
+
     @staticmethod
     def _numify(n: str) -> Number:
         if n == '.':
@@ -63,12 +67,12 @@ class Tunnel:
         return Tunnel.SPACE
 
 
-    def flood_fill(self, start=None, goal='', *, enable_visuals=False) -> int:
+    def flood_fill(self, start=None, goal='') -> int:
         start = start if start is not None else self.entrance
         front = [start]
         dist = 0
 
-        if enable_visuals:
+        if self.enable_visuals:
             self.show(title=f'Distance: {dist}')
 
         while not self.is_filled():
@@ -84,7 +88,7 @@ class Tunnel:
                         if self.orig_map[new_point.x][new_point.y] == goal:
                             return dist
 
-            if enable_visuals:
+            if self.enable_visuals:
                 self.show(title=f'Distance: {dist}')
 
             front = new_front
@@ -117,10 +121,9 @@ def test_1():
 #.....@.a.B.c.d.A.e.F.g#
 ########################""".splitlines()
 
-    tunnels = Tunnel(orig_tunnels)
-    tunnels.flood_fill(enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels.flood_fill()
     tunnels.reset_map()
-    tunnels.show()
 
     _ = input('Done, press any key to finish...')
     plt.close()
@@ -137,8 +140,8 @@ def test_2():
 #l.F..d...h..C.m#
 #################""".splitlines()
 
-    tunnels = Tunnel(orig_tunnels)
-    tunnels.flood_fill(enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')
     plt.close()
@@ -152,8 +155,8 @@ def test_3():
 ###g#h#i################
 ########################""".splitlines()
 
-    tunnels = Tunnel(orig_tunnels)
-    tunnels.flood_fill(enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')
     plt.close()
@@ -163,8 +166,8 @@ def main():
     with open('input18.txt') as f:
         orig_tunnels = f.readlines()
 
-    tunnels = Tunnel(orig_tunnels)
-    tunnels.flood_fill(enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels, enable_visuals=True)
+    tunnels.flood_fill()
 
     _ = input('Done, press any key to finish...')
     plt.close()

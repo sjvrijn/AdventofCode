@@ -124,8 +124,8 @@ class Tunnel:
             plt.show()
 
 
-def find_shortest_route(all_keys, tunnels):
-    min_route, min_dist = None, float('inf')
+def find_shortest_routes(all_keys, tunnels):
+    min_routes, min_dist = [], float('inf')
     for perm in permutations(all_keys):
         collected_keys = ''
         route_dist = 0
@@ -141,11 +141,19 @@ def find_shortest_route(all_keys, tunnels):
             collected_keys += key
 
         if route_dist < min_dist:
-            min_route = perm
+            min_routes = [''.join(perm)]
             min_dist = route_dist
-            print(f"[improvement found] {''.join(min_route)}: {min_dist}")
-    print(f"[final result] {''.join(min_route)}: {min_dist}")
-    return min_dist, min_route
+            print(f"[improvement found] {min_routes[0]}: {min_dist}")
+        elif route_dist == min_dist < float('inf'):
+            min_routes.append(''.join(perm))
+            print(f"[additional min found] {''.join(perm)}: {min_dist}")
+
+    if len(min_routes) == 1:
+        print(f"[final result] {min_routes[0]}: {min_dist}")
+    else:
+        print(f"[final result] {len(min_routes)} routes: {min_dist}")
+
+    return min_dist, min_routes
 
 
 
@@ -160,11 +168,11 @@ def test_1():
     tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
     start = time()
-    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    min_dist, min_routes = find_shortest_route(all_keys, tunnels)
     duration = time() - start
 
     assert min_dist == 132
-    assert ''.join(min_route) == 'bacdfeg'
+    assert 'bacdfeg' in min_routes
 
     _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()
@@ -185,11 +193,11 @@ def test_3():
     tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
     start = time()
-    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    min_dist, min_routes = find_shortest_route(all_keys, tunnels)
     duration = time() - start
 
     assert min_dist == 136
-    assert ''.join(min_route) == 'afbjgnhdloepcikm'
+    assert 'afbjgnhdloepcikm' in min_routes
 
     _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()
@@ -207,11 +215,11 @@ def test_2():
     tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
     start = time()
-    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    min_dist, min_routes = find_shortest_route(all_keys, tunnels)
     duration = time() - start
 
     assert min_dist == 81
-    assert ''.join(min_route) == 'acfidgbeh'
+    assert 'acfidgbeh' in min_routes
 
     _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()

@@ -1,8 +1,8 @@
 from collections import namedtuple
-from copy import copy
 from itertools import permutations, product
 from numbers import Number
 from string import ascii_lowercase
+from time import time
 from typing import Tuple, Union
 
 import numpy as np
@@ -124,19 +124,8 @@ class Tunnel:
             plt.show()
 
 
-
-def test_1():
-    orig_tunnels = """########################
-#...............b.C.D.f#
-#.######################
-#.....@.a.B.c.d.A.e.F.g#
-########################"""
-
-    all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
-    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
-
+def find_shortest_route(all_keys, tunnels):
     min_route, min_dist = None, float('inf')
-
     for perm in permutations(all_keys):
         collected_keys = ''
         route_dist = 0
@@ -155,17 +144,33 @@ def test_1():
             min_route = perm
             min_dist = route_dist
             print(f"[improvement found] {''.join(min_route)}: {min_dist}")
-
     print(f"[final result] {''.join(min_route)}: {min_dist}")
+    return min_dist, min_route
+
+
+
+def test_1():
+    orig_tunnels = """########################
+#...............b.C.D.f#
+#.######################
+#.....@.a.B.c.d.A.e.F.g#
+########################"""
+
+    all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
+
+    start = time()
+    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    duration = time() - start
 
     assert min_dist == 132
     assert ''.join(min_route) == 'bacdfeg'
 
-    _ = input('Done, press any key to finish...')
+    _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()
 
 
-def test_2():
+def test_3():
     orig_tunnels = """#################
 #i.G..c...e..H.p#
 ########.########
@@ -176,14 +181,21 @@ def test_2():
 #l.F..d...h..C.m#
 #################"""
 
-    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
-    tunnels.flood_fill()
+    all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
-    _ = input('Done, press any key to finish...')
+    start = time()
+    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    duration = time() - start
+
+    assert min_dist == 136
+    assert ''.join(min_route) == 'afbjgnhdloepcikm'
+
+    _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()
 
 
-def test_3():
+def test_2():
     orig_tunnels = """########################
 #@..............ac.GI.b#
 ###d#e#f################
@@ -191,10 +203,17 @@ def test_3():
 ###g#h#i################
 ########################"""
 
-    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
-    tunnels.flood_fill()
+    all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
-    _ = input('Done, press any key to finish...')
+    start = time()
+    min_dist, min_route = find_shortest_route(all_keys, tunnels)
+    duration = time() - start
+
+    assert min_dist == 81
+    assert ''.join(min_route) == 'acfidgbeh'
+
+    _ = input(f'Done in {duration:.3f} sec, press any key to finish...')
     plt.close()
 
 

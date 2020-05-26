@@ -2,7 +2,7 @@ from collections import namedtuple
 from copy import copy
 from itertools import product
 from numbers import Number
-from string import ascii_lowercase, ascii_uppercase
+from string import ascii_lowercase
 from typing import Tuple, Union
 
 import numpy as np
@@ -29,8 +29,7 @@ class Tunnel:
     SPACE = 0       # '.'
     VISITED = -1
 
-    def __init__(self, orig_tunnels, blocking=ascii_uppercase, enable_visuals=False):
-        self.blocking = blocking
+    def __init__(self, orig_tunnels, enable_visuals=False):
         self.enable_visuals = enable_visuals
         self.orig_map = orig_tunnels
         self.map = self._parse_map(orig_tunnels)
@@ -67,11 +66,12 @@ class Tunnel:
         return Tunnel.SPACE
 
 
-    def flood_fill(self, start=None, goal='') -> Tuple[Union[Point, None], int]:
+    def flood_fill(self, start=None, goal='', keys='') -> Tuple[Union[Point, None], int]:
         if start is None:
             start = self.entrance
         front = [start]
         dist = 0
+        keys = keys.upper()
 
         if self.enable_visuals:
             self.show(title=f'Distance: {dist}')
@@ -83,7 +83,7 @@ class Tunnel:
             new_front = []
             for point, d in product(front, directions):
                 new_point = point + d
-                if self.is_point_free(new_point):
+                if self.is_point_free(new_point, keys):
                     self.map[new_point] = dist
                     new_front.append(new_point)
 
@@ -101,12 +101,12 @@ class Tunnel:
         return None, dist
 
 
-    def is_point_free(self, p: Point) -> bool:
+    def is_point_free(self, p: Point, keys: str) -> bool:
         try:
-            is_free = self.map[p] == Tunnel.SPACE
-            is_blocked = self.orig_map[p.x][p.y] in self.blocking
+            is_free = self.map[p] == Tunnel.SPACE or self.map[p] == Tunnel.ENTRANCE
+            is_blocked = self.orig_map[p.x][p.y].isupper() \
+                         and self.orig_map[p.x][p.y] not in keys
         except IndexError as e:
-            print(e)
             return False
         return is_free and not is_blocked
 

@@ -1,6 +1,6 @@
 from collections import namedtuple
 from copy import copy
-from itertools import product
+from itertools import permutations, product
 from numbers import Number
 from string import ascii_lowercase
 from typing import Tuple, Union
@@ -133,12 +133,33 @@ def test_1():
 ########################"""
 
     all_keys = sorted(set(orig_tunnels) & set(ascii_lowercase))
-    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=True)
+    tunnels = Tunnel(orig_tunnels.splitlines(), enable_visuals=False)
 
-    for key in all_keys:
-        print(tunnels.flood_fill(goal=key))
-        tunnels.reset_map()
+    min_route, min_dist = None, float('inf')
 
+    for perm in permutations(all_keys):
+        collected_keys = ''
+        route_dist = 0
+        loc = tunnels.entrance
+
+        for key in perm:
+            loc, dist = tunnels.flood_fill(start=loc, goal=key, keys=collected_keys)
+            tunnels.reset_map()
+            if loc is None:
+                route_dist = float('inf')
+                break
+            route_dist += dist
+            collected_keys += key
+
+        if route_dist < min_dist:
+            min_route = perm
+            min_dist = route_dist
+            print(f"[improvement found] {''.join(min_route)}: {min_dist}")
+
+    print(f"[final result] {''.join(min_route)}: {min_dist}")
+
+    assert min_dist == 132
+    assert ''.join(min_route) == 'bacdfeg'
 
     _ = input('Done, press any key to finish...')
     plt.close()

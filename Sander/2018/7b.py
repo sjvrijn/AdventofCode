@@ -26,7 +26,7 @@ with open('input7.txt') as f:
     for line in f:
         _, pre, _, _, _, _, _, post, _, _ = line.split() 
         tasks[post].append(pre)
-        
+
 workers = [{'task': None, 'time': 0} for i in range(5)]
 total_time = 0
 while todo:
@@ -39,9 +39,7 @@ while todo:
         worker['task'] = task
         worker['time'] = task_time[task]
         del tasks[task]
-    #print(total_time, [f'{w["task"]}:{w["time"]}' for w in workers])
-    
-    time_step = min([w['time'] for w in workers if w['time'] != 0])
+    time_step = min(w['time'] for w in workers if w['time'] != 0)
 
     for worker in workers:
         if worker['task'] is None:
@@ -52,7 +50,7 @@ while todo:
             set_task_done(worker['task'], tasks)
             todo.remove(worker['task'])
             worker['task'] = None
-    
+
     total_time += time_step
     
     #print(total_time, [f'{w["task"]}:{w["time"]}' for w in workers])

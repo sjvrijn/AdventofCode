@@ -162,10 +162,7 @@ class IntCode:
                 addr1, addr2, addr3 = self.program[self.pc + 1:self.pc + 4]
                 val1 = self.get_value(addr1, mode1)
                 val2 = self.get_value(addr2, mode2)
-                if val1 < val2:
-                    outcome = 1
-                else:
-                    outcome = 0
+                outcome = 1 if val1 < val2 else 0
                 self.write_safe(addr3, outcome, mode3)
                 self.pc += 4
 
@@ -173,10 +170,7 @@ class IntCode:
                 addr1, addr2, addr3 = self.program[self.pc + 1:self.pc + 4]
                 val1 = self.get_value(addr1, mode1)
                 val2 = self.get_value(addr2, mode2)
-                if val1 == val2:
-                    outcome = 1
-                else:
-                    outcome = 0
+                outcome = 1 if val1 == val2 else 0
                 self.write_safe(addr3, outcome, mode3)
                 self.pc += 4
 

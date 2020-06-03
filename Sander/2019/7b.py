@@ -48,11 +48,7 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
 
         elif opcode == 3:
             addr1 = program[pc+1]
-            if inputs:
-                in_value = inputs.pop(0)
-            else:
-                in_value = int(input("Input required: "))
-
+            in_value = inputs.pop(0) if inputs else int(input("Input required: "))
             program[addr1] = in_value
             pc += 2
 
@@ -87,20 +83,14 @@ def intcode(program, inputs=None, print_out=False, verbose=False):
             addr1, addr2, addr3 = program[pc+1:pc+4]
             val1 = program[addr1] if mode1 == 0 else addr1
             val2 = program[addr2] if mode2 == 0 else addr2
-            if val1 < val2:
-                program[addr3] = 1
-            else:
-                program[addr3] = 0
+            program[addr3] = 1 if val1 < val2 else 0
             pc += 4
 
         elif opcode == 8:
             addr1, addr2, addr3 = program[pc+1:pc+4]
             val1 = program[addr1] if mode1 == 0 else addr1
             val2 = program[addr2] if mode2 == 0 else addr2
-            if val1 == val2:
-                program[addr3] = 1
-            else:
-                program[addr3] = 0
+            program[addr3] = 1 if val1 == val2 else 0
             pc += 4
 
         elif opcode == 99:

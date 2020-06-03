@@ -20,7 +20,7 @@ num_repetitions = 10_000 - (offset // len(signal))
 long_signal = list(chain.from_iterable(repeat(signal, num_repetitions)))
 long_signal = list(reversed(long_signal[offset % len(signal):]))
 
-for phase_idx in range(100):
+for _ in range(100):
     long_signal = np.cumsum(long_signal) % 10
 
 print(join(list(reversed(long_signal.tolist()))[:8]))

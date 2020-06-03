@@ -14,7 +14,7 @@ for idx, asteroid in enumerate(asteroids):
     rel_locs = non_self_asteroids - asteroid
     gcds = np.gcd(*rel_locs.T).reshape(-1, 1)
     vision_lines = rel_locs / gcds
-    unique_visible = set(tuple(x) for x in vision_lines)
+    unique_visible = {tuple(x) for x in vision_lines}
     if len(unique_visible) > max_visible:
         max_idx = idx
         max_visible = len(unique_visible)

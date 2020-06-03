@@ -161,8 +161,7 @@ for len_a, len_b, len_c in product(range(2, 11, 2), repeat=3):
 # Program has been determined, now re_init space-roomba and do program
 instructions = read_instructions('input17.txt')
 instructions[0] = 2
-inputs = []
-inputs.extend(to_ascii_list(final_program))
+inputs = list(to_ascii_list(final_program))
 for program in programs.values():
     inputs.extend(to_ascii_list(program))
 inputs.extend([ord('n'), 10])

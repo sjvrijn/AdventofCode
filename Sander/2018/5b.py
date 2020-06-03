@@ -18,4 +18,7 @@ def collapse(polymer, ignore):
             new_polymer.append(unit)
     
     return len(''.join(new_polymer))
-min([(letter, collapse(polymer, letter)) for letter in ascii_lowercase], key=lambda x: x[1])
+min(
+    ((letter, collapse(polymer, letter)) for letter in ascii_lowercase),
+    key=lambda x: x[1],
+)

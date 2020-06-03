@@ -39,11 +39,10 @@ crossings = []
 for x, y in product(range(1, max_x-1), range(1, max_y-1)):
     coord = Point(x, y)
 
-    if scaffold[coord] == ord('#'):
-        if all(scaffold[coord + neighbor] == ord('#') for neighbor in neighbors):
-            crossings.append(coord)
+    if scaffold[coord] == ord('#') and all(
+        scaffold[coord + neighbor] == ord('#') for neighbor in neighbors
+    ):
+        crossings.append(coord)
 
-param_sum = 0
-for cross in crossings:
-    param_sum += cross.x * cross.y
+param_sum = sum(cross.x * cross.y for cross in crossings)
 print(param_sum)

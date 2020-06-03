@@ -83,7 +83,7 @@ def recursive_dinges(source, direction, verbose=False):
 
     # Flow sideways
     if direction != Direction.DOWN:
-        while x in range(0, xmax):
+        while x in range(xmax):
             if ground[y, x] == SoilType.CLAY:
                 if verbose:
                     dir_txt = 'left' if direction == Direction.LEFT else 'right'
@@ -94,7 +94,7 @@ def recursive_dinges(source, direction, verbose=False):
 
             if ground[y+1, x] == SoilType.DRY:
                 ret, _ = recursive_dinges((y, x), direction=Direction.DOWN, verbose=verbose)
-                if ret == ReturnCode.OFF_MAP or ret == ReturnCode.JOINED_WATER:
+                if ret in [ReturnCode.OFF_MAP, ReturnCode.JOINED_WATER]:
                     if verbose:
                         print("off map (recursive, down flow)")
                     return ReturnCode.OFF_MAP, None

@@ -122,7 +122,7 @@ def recurse_through_maze(maze, cur_pos, depth=1, draw_map=False, verbose=False):
             maze[cur_pos] = Maze.SPACE
             plt.clf()
 
-        if out == Report.MOVED or out == Report.FOUND:
+        if out in [Report.MOVED, Report.FOUND]:
             recurse_through_maze(maze, new_pos, depth=depth+1,
                                  draw_map=draw_map, verbose=verbose)
             # undo move:
@@ -147,8 +147,7 @@ plt.clf()
 
 
 num_minutes = 0
-spreading = set()
-spreading.add(Point(*np.argwhere(maze == Maze.OXYGEN)[0]))
+spreading = {Point(*np.argwhere(maze == Maze.OXYGEN)[0])}
 draw_spread = False
 verbose = False
 

@@ -10,7 +10,7 @@ num_generations = 20
 buffer = '.'*((num_generations*2) + 2)
 state = buffer + init + buffer
 
-for i in range(num_generations):
+for _ in range(num_generations):
     statelist = ['.', '.']
     for window in more_itertools.windowed(state, 5):
         statelist.append(rules[''.join(window)])

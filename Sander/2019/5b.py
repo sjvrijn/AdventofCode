@@ -75,20 +75,14 @@ def intcode(program, verbose=False):
             addr1, addr2, addr3 = program[pc+1:pc+4]
             val1 = program[addr1] if mode1 == 0 else addr1
             val2 = program[addr2] if mode2 == 0 else addr2
-            if val1 < val2:
-                program[addr3] = 1
-            else:
-                program[addr3] = 0
+            program[addr3] = 1 if val1 < val2 else 0
             pc += 4
 
         elif opcode == 8:
             addr1, addr2, addr3 = program[pc+1:pc+4]
             val1 = program[addr1] if mode1 == 0 else addr1
             val2 = program[addr2] if mode2 == 0 else addr2
-            if val1 == val2:
-                program[addr3] = 1
-            else:
-                program[addr3] = 0
+            program[addr3] = 1 if val1 == val2 else 0
             pc += 4
 
         elif opcode == 99:

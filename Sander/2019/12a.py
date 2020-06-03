@@ -62,10 +62,10 @@ def apply_gravity(A, B):
         
 from itertools import combinations
 
-for step in range(1000):
+for _ in range(1000):
     for moon_a, moon_b in combinations(moons, 2):
         apply_gravity(moon_a, moon_b)
     for moon in moons:
         moon.move()
-        
+
 print(sum(m.total for m in moons))

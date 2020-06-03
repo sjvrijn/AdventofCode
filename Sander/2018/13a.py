@@ -54,14 +54,7 @@ class Cart:
         return self.x == other.x and self.y == other.y
 
     def __lt__(self, other):
-        if self.x < other.x:
-            return True
-        elif other.x < self.x:
-            return False
-        elif self.y < other.y:
-            return True
-        else:
-            return False
+        return self.x < other.x or other.x >= self.x and self.y < other.y
 
     def __repr__(self):
         return f"'{self.direction}' @ [{self.x}, {self.y}]"
@@ -82,7 +75,7 @@ while True:
     for cart in carts:
         cart.move()
 
-        if any([cart == c and cart is not c for c in carts]):
+        if any(cart == c and cart is not c for c in carts):
             raise Exception(f'Collision at [{cart.y},{cart.x}]!')
 
         elif tracks[cart.x, cart.y] == '+':

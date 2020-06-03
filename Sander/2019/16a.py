@@ -12,7 +12,7 @@ def matrix_fft(data, num_phases):
         pattern[idx, idx:] = tiled_pattern[:num_to_fill]
 
     dvec = np.array(data, dtype=np.int)
-    for phase_idx in range(num_phases):
+    for _ in range(num_phases):
         dvec = np.abs(np.dot(pattern, dvec)) % 10
 
     return dvec.tolist()

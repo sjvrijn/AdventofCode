@@ -1,20 +1,14 @@
 def execute_turn(cur_direction, turn, degrees):
     directions = 'NESW'
-    cur_idx = directions.index(cur_direction)
-    change = degrees//90
-    if turn == 'L':
-        change *= -1
-    return directions[(cur_idx + change) % 4]
+    change = degrees//90 if turn == 'R' else -degrees//90
+    return directions[(directions.index(cur_direction) + change) % 4]
 
 
 def turn_wp(wp_ew, wp_ns, turn, degrees):
     right_turns = degrees // 90 if turn == 'R' else 4 - (degrees // 90)
-    if right_turns == 1:
-        return wp_ns, -wp_ew
-    if right_turns == 2:
-        return -wp_ew, -wp_ns
-    if right_turns == 3:
-        return -wp_ns, wp_ew
+    for _ in range(right_turns):
+        wp_ew, wp_ns = wp_ns, -wp_ew
+    return wp_ew, wp_ns
 
 
 def a(instructions):

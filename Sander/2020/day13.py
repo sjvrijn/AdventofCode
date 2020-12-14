@@ -45,18 +45,15 @@ def combine_bus_constraints(residual1, modulus1, residual2, modulus2):
 def b(busses):
     bus_offsets = sorted(
         [
-            (offset%int(bus), int(bus))
+            ((int(bus) - offset)%int(bus), int(bus))
             for offset, bus in enumerate(busses.split(','))
             if bus != 'x'
         ],
         key=itemgetter(1),
     )
-    print(bus_offsets)
     offset, combined_bus_ids = bus_offsets[0]
-    print(0, offset, combined_bus_ids)
     for idx, (extra_offset, bus_id) in enumerate(bus_offsets[1:], start=1):
         offset, combined_bus_ids = combine_bus_constraints(offset, combined_bus_ids, extra_offset, bus_id)
-        print(idx, offset, combined_bus_ids)
     return offset
 
 

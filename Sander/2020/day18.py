@@ -1,10 +1,3 @@
-from itertools import product
-import re
-
-from parse import parse
-import numpy as np
-
-
 def eval_new_math(line):
     val = line.pop(0)
     if val == '(':

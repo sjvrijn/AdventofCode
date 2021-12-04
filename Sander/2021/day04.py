@@ -1,10 +1,6 @@
-from collections import Counter, defaultdict
-from itertools import product
-
 import numpy as np
 from more_itertools import chunked
 import parse
-
 
 
 def bingo(board):
@@ -34,6 +30,7 @@ def b(numbers, boards):
             break
     return int(np.nansum(bingo_boards[-1])) * n
 
+
 board_line = parse.compile('{:d} {:d} {:d} {:d} {:d}')
 def parse_board(lines):
     return np.array([
@@ -51,10 +48,12 @@ if __name__ == '__main__':
         print(filename)
         with open(filename) as f:
             lines = f.read().splitlines()
+
         numbers = list(map(int, lines[0].split(',')))
-        boards = []
-        for chunk in chunked(lines[1:], 6):
-            boards.append(parse_board(chunk[1:]))
+        boards = [
+            parse_board(chunk[1:])
+            for chunk in chunked(lines[1:], 6)
+        ]
 
         print(f'A: {a(numbers, boards)}')
         print(f'B: {b(numbers, boards)}')  # 16524 too high

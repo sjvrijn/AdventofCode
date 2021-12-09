@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 import numpy as np
 
 
@@ -29,9 +27,8 @@ def b(positions):
     return best_fuel_use
 
 
-@lru_cache(maxsize=None)
 def triangle_num(n):
-    return np.sum(np.arange(1, n+1))
+    return n*(n+1) // 2
 
 
 triangle_num = np.vectorize(triangle_num)

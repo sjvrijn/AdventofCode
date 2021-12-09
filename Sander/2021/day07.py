@@ -46,7 +46,7 @@ if __name__ == '__main__':
     for filename in files:
         print(filename)
         with open(filename) as f:
-            positions = list(map(int, f.read().strip().split(',')))
+            positions = list(map(int, f.read().split(',')))
 
         print(f'A: {a(positions)}')
         print(f'B: {b(positions)}')

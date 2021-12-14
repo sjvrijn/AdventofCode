@@ -1,11 +1,5 @@
-from collections import Counter, defaultdict
+from collections import defaultdict
 from copy import copy
-from itertools import product
-from pprint import pprint
-
-from more_itertools import chunked
-import numpy as np
-import parse
 
 
 def a(edges):
@@ -45,7 +39,6 @@ def build_double_visit_routes(route, options, edges):
     for option in options:
         if option in edges[route[-1]]:
             new_route = copy(route) + [option]
-            check_double_visit = is_double_visit_safe(new_route)
             if not is_double_visit_safe(new_route):
                 continue
             if option == 'end':

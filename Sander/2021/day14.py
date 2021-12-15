@@ -1,31 +1,47 @@
 from collections import Counter
+from functools import reduce
+from operator import add
 
 from more_itertools import pairwise
 import parse
 
 
+RULE_CACHE = {}  # global cache to allow function recursion
+
+
 def a(data):
-    template, rules = data
-    for _ in range(10):
-        template = apply_rules(template, rules)
-    c = Counter(template).most_common()
+    c = calc_element_counts(data, 10)
     return c[0][1] - c[-1][1]
 
 
 def b(data):
-    template, rules = data
-    for _ in range(40):
-        template = apply_rules(template, rules)
-    c = Counter(template).most_common()
+    c = calc_element_counts(data, 40)
     return c[0][1] - c[-1][1]
 
 
-def apply_rules(template, rules):
-    new_template = []
-    for a, b in pairwise(template):
-        new_template.extend([a, rules[(a, b)]])
-    new_template.append(template[-1])
-    return ''.join(new_template)
+def calc_element_counts(data, n):
+    template, rules = data
+    counts = [cached_apply_rule(pair, n, rules) for pair in pairwise(template)]
+    counts = reduce(add, counts)
+    counts[template[-1]] += 1
+    return counts.most_common()
+
+
+def cached_apply_rule(pair, depth, rules):
+    if (pair, depth) in RULE_CACHE:
+        return RULE_CACHE[(pair, depth)]
+
+    a, b = pair
+    template = ''.join([a, rules[(a,b)], b])
+    if depth == 1:
+        counts = Counter(template[:2])
+    else:
+        part1 = cached_apply_rule(template[:2], depth-1, rules)
+        part2 = cached_apply_rule(template[-2:], depth-1, rules)
+        counts = part1 + part2
+
+    RULE_CACHE[(pair, depth)] = counts
+    return counts
 
 
 def parse_input(lines):
@@ -44,6 +60,7 @@ if __name__ == '__main__':
         'input14.txt',
     ]
     for filename in files:
+        RULE_CACHE = {}  # clear cache for each new set of rules
         print(filename)
         with open(filename) as f:
             lines = f.read().splitlines()  # multi-line file

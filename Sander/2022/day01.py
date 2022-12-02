@@ -2,12 +2,12 @@ from pathlib import Path
 
 
 def a(elves):
-    """Solve day {NUM} part 1"""
+    """Solve day 1 part 1"""
     return max(sum(map(int, elf)) for elf in elves)
 
 
 def b(elves):
-    """Solve day {NUM} part 2"""
+    """Solve day 1 part 2"""
     return sum(sorted(sum(map(int, elf)) for elf in elves)[-3:])
 
 

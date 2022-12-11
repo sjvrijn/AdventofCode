@@ -11,7 +11,6 @@ def a(stacks, moves):
         to_stack, from_stack = to_stack-1, from_stack-1
         stacks[to_stack] = stacks[from_stack][:num][::-1] + stacks[to_stack]
         stacks[from_stack] = stacks[from_stack][num:]
-        # print(stacks)
     return ''.join(stack[0] for stack in stacks)
 
 
@@ -22,7 +21,6 @@ def b(stacks, moves):
         to_stack, from_stack = to_stack-1, from_stack-1
         stacks[to_stack] = stacks[from_stack][:num] + stacks[to_stack]
         stacks[from_stack] = stacks[from_stack][num:]
-        # print(stacks)
     return ''.join(stack[0] for stack in stacks)
 
 

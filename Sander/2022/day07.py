@@ -1,10 +1,5 @@
-from collections import Counter, defaultdict
-from itertools import product
 from pathlib import Path
-from pprint import pprint
 
-from more_itertools import chunked
-import numpy as np
 import parse
 
 
@@ -75,11 +70,9 @@ def parse_file(f: Path):
             cur_path.pop(-1)
         elif line.startswith('$ cd'):
             cur_path.append(cur_path[-1][line[5:]])
-        elif line.startswith('$ ls'):
-            pass
         elif line.startswith('dir'):
             cur_path[-1][line[4:]] = {}
-        else:
+        elif not line.startswith('$ ls'):
             size, filename = file_line_template.parse(line)
             cur_path[-1][filename] = size
 

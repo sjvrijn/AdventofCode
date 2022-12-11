@@ -47,8 +47,7 @@ def b(lines):
 
 def parse_file(f: Path):
     """Parse the input file into relevant data structure"""
-    lines = f.read_text().splitlines()
-    return lines
+    return f.read_text().splitlines()
 
 
 def main():

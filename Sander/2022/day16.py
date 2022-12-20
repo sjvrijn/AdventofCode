@@ -2,8 +2,6 @@ from pathlib import Path
 
 import numpy as np
 import parse
-from tqdm import tqdm
-import xarray as xr
 
 
 def calc_distances(valves):
@@ -29,53 +27,45 @@ def calc_distances(valves):
         distances[(paths > 0) & (distances == 0)] = dist
         dist += 1
 
-    named_dists = xr.DataArray(data=distances, coords={'src': valve_names, 'tgt': valve_names})
-
-    return named_dists
+    return valve_indices, distances
 
 
-def calc_max_flow(valves, distances, time_left=30,
-                  so_far=None, cur_flow=0, total_flow=0, depth=0):
+def calc_max_flow(valves, valve_indices, distances, time_left=30,
+                  so_far=None, cur_flow=0, total_flow=0):
     if not so_far:
         so_far = ['AA']
-    # print(f"{'    '*depth}[t={time_left}], {so_far}, {cur_flow}, ({total_flow})")
-    best_flow = 0
-    src = so_far[-1]
+    # Best max flow if no further valves are opened
+    best_flow = total_flow + (cur_flow * time_left)
+    src = valve_indices[so_far[-1]]
 
-    if depth < 2:
-        iterator = tqdm(valves, leave=False)
-    else:
-        iterator = valves
-
+    iterator = valves
     for valve, flow in iterator:
         if valve in so_far:
             continue
-        dist = distances.sel(src=src, tgt=valve).values
+        dist = distances[src, valve_indices[valve]]
         if dist >= time_left:
             continue
-        # print(f"{'    ' * depth}  {valve}:{flow} @ {dist}")
         next_flow = calc_max_flow(
-            valves, distances,
+            valves, valve_indices, distances,
             time_left=time_left-(dist+1),
             so_far=so_far+[valve],
             cur_flow=cur_flow + flow,
             total_flow=total_flow + (cur_flow * (dist+1)),
-            depth=depth+1
         )
         best_flow = max(best_flow, next_flow)
 
-    best_flow = max(best_flow, total_flow + (cur_flow * time_left))
     return best_flow
+
 
 def a(valves):
     """Solve day 16 part 1"""
-    distances = calc_distances(valves)
+    valve_indices, distances = calc_distances(valves)
     filtered_valves = tuple(
         (valve, flow)
         for valve, (flow, _) in valves.items()
         if flow != 0
     )
-    return calc_max_flow(filtered_valves, distances)
+    return calc_max_flow(filtered_valves, valve_indices, distances)
 
 
 def b(valves):

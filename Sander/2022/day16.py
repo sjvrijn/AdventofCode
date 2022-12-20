@@ -1,3 +1,4 @@
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
@@ -32,10 +33,12 @@ def calc_distances(valves):
 
 def calc_max_flow(valves, valve_indices, distances, time_left=30,
                   so_far=None, cur_flow=0, total_flow=0):
-    if not so_far:
-        so_far = ['AA']
     # Best max flow if no further valves are opened
     best_flow = total_flow + (cur_flow * time_left)
+    if not so_far:
+        so_far = ['AA']
+
+    flow_routes = {frozenset(so_far[1:]): best_flow}
     src = valve_indices[so_far[-1]]
 
     iterator = valves
@@ -45,16 +48,18 @@ def calc_max_flow(valves, valve_indices, distances, time_left=30,
         dist = distances[src, valve_indices[valve]]
         if dist >= time_left:
             continue
-        next_flow = calc_max_flow(
+        next_flow_routes = calc_max_flow(
             valves, valve_indices, distances,
             time_left=time_left-(dist+1),
             so_far=so_far+[valve],
             cur_flow=cur_flow + flow,
             total_flow=total_flow + (cur_flow * (dist+1)),
         )
-        best_flow = max(best_flow, next_flow)
+        for route, next_flow in next_flow_routes.items():
+            flow_routes[route] = max(flow_routes.get(route, 0), next_flow)
 
-    return best_flow
+    return flow_routes
+    # return best_flow
 
 
 def a(valves):
@@ -65,12 +70,25 @@ def a(valves):
         for valve, (flow, _) in valves.items()
         if flow != 0
     )
-    return calc_max_flow(filtered_valves, valve_indices, distances)
+    routes = calc_max_flow(filtered_valves, valve_indices, distances)
+    return max(routes.values())
 
 
 def b(valves):
     """Solve day 16 part 2"""
-    pass
+    valve_indices, distances = calc_distances(valves)
+    filtered_valves = tuple(
+        (valve, flow)
+        for valve, (flow, _) in valves.items()
+        if flow != 0
+    )
+    routes = calc_max_flow(filtered_valves, valve_indices, distances, time_left=26)
+    best_flow = 0
+    for (me, my_flow), (elephant, el_flow) in combinations(routes.items(), r=2):
+        if me.isdisjoint(elephant):
+            best_flow = max(best_flow, my_flow+el_flow)
+
+    return best_flow
 
 
 def parse_file(f: Path):
@@ -98,7 +116,7 @@ def main():
         data = parse_file(Path(filename))
 
         print(f'A: {a(data)}')
-        # print(f'B: {b(data)}')
+        print(f'B: {b(data)}')
 
 
 if __name__ == '__main__':

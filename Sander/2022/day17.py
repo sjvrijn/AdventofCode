@@ -75,22 +75,31 @@ def a(jet_pattern):
 
 def b(jet_pattern):
     """Solve day 17 part 2"""
-    shaft = np.zeros((100_000, 7))
+    target = 1_000_000_000_000
+    shaft = np.zeros((10_000, 7))
     shaft[0] = 2
     cur_height = 0
     jet_pattern = cycle(enumerate(jet_pattern))
     jet_idx = 0
     height_history = {}
+    height_repeats_every_n = None
 
-    for rock_idx, rock_shape in cycle(enumerate(ROCK_SHAPES)):
+    for rock_idx, (shape_idx, rock_shape) in enumerate(cycle(enumerate(ROCK_SHAPES))):
         rock = Rock(rock_shape, cur_height)
-        if (rock_idx, jet_idx) in height_history:
-            print(rock_idx, jet_idx, height_history[(rock_idx, jet_idx)], cur_height)
-        else:
-            height_history[(rock_idx, jet_idx)] = cur_height
+        if (shape_idx, jet_idx) in height_history:
+            a, b = height_history[(shape_idx, jet_idx)]
+            a.append(rock_idx)
+            b.append(cur_height)
+            # search for height pattern
+            if height_repeats_every_n is None and len(b) >= 3:
+                if b[-1] - b[-2] == b[-2] - b[-3]:
+                    # repeating pattern found!
+                    repeating_height = int(b[-1] - b[-2])
+                    height_repeats_every_n = a[-1] - a[-2]
+                    target_rock_idx = target % height_repeats_every_n
 
-        if cur_height > 5500:
-            break
+        else:
+            height_history[(shape_idx, jet_idx)] = [rock_idx], [cur_height]
 
         while not np.sum(shaft[rock.astuple()]):
             jet_idx, jet = next(jet_pattern)
@@ -101,6 +110,12 @@ def b(jet_pattern):
         shaft[rock.astuple()] = 1
         cur_height = max(cur_height, max(rock.shape[0]))
 
+        if height_repeats_every_n and rock_idx % height_repeats_every_n == target_rock_idx:
+            remaining_rocks = target - rock_idx
+            assert remaining_rocks % height_repeats_every_n == 0
+            num_repeats = remaining_rocks // height_repeats_every_n
+            return cur_height + (num_repeats * repeating_height) - 1
+
 
 def parse_file(f: Path):
     """Parse the input file into relevant data structure"""
@@ -110,7 +125,7 @@ def parse_file(f: Path):
 def main():
     """Main function to wrap variables"""
     files = [
-        # 'input17-test1.txt',
+        'input17-test1.txt',
         'input17.txt',
     ]
     for filename in files:

@@ -12,33 +12,25 @@ def neighbors(x, y):
 
 def move_north(has_neighbors, elf):
     if not (has_neighbors[0] or has_neighbors[1] or has_neighbors[2]):
-        # print("move north")
         return elf[0]-1, elf[1]
-    # print('blocked north')
     return None
 
 
 def move_south(has_neighbors, elf):
     if not (has_neighbors[4] or has_neighbors[5] or has_neighbors[6]):
-        # print('move south')
         return elf[0]+1, elf[1]
-    # print('blocked south')
     return None
 
 
 def move_west(has_neighbors, elf):
     if not (has_neighbors[0] or has_neighbors[6] or has_neighbors[7]):
-        # print("move west")
         return elf[0], elf[1]-1
-    # print('blocked west')
     return None
 
 
 def move_east(has_neighbors, elf):
     if not (has_neighbors[2] or has_neighbors[3] or has_neighbors[4]):
-        # print('move east')
         return elf[0], elf[1]+1
-    # print('blocked east', has_neighbors[2], has_neighbors[3], has_neighbors[4])
     return None
 
 
@@ -47,14 +39,12 @@ def move_elf(elf, all_elves, move_order):
         n in all_elves
         for n in neighbors(*elf)
     ]
-    # print(elf, list(neighbors(*elf)), has_neighbors)
     if not any(has_neighbors):
         return elf
 
     for move_func in move_order:
         move = move_func(has_neighbors, elf)
         if move is not None:
-            # print(elf, move)
             return move
     return elf
 
@@ -112,10 +102,6 @@ def simualte_elves(lines, report_empty_at=None):
         if report_empty_at is not None and i == report_empty_at:
             area_size = ((maxx-minx)+1) * ((maxy-miny)+1)
             return area_size - len(elves)
-        # print(i)
-        # for row in area:
-        #     print(''.join('#' if char else '.' for char in row))
-        # print()
 
     return i
 

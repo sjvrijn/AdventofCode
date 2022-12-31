@@ -14,34 +14,17 @@ neighbors = (
 def a(heights):
     """Solve day 12 part 1"""
     start = tuple(np.argwhere(heights == ord('S'))[0])
-    end = tuple(np.argwhere(heights == ord('E'))[0])
-    heights[start] = ord('a')
-    heights[end] = ord('z')
-    max_dist = heights.size
-    distances = np.full_like(heights, fill_value=max_dist, dtype=np.int16)
-    distances[end] = 0
-    to_check = [end]
-    while to_check:
-        x, y = to_check.pop(0)
-        cur_height = heights[x, y]
-        for dx, dy in neighbors:
-            newx, newy = x+dx, y+dy
-            if newx < 0 or newx >= heights.shape[0]:
-                continue
-            if newy < 0 or newy >= heights.shape[1]:
-                continue
-            if distances[newx, newy] != max_dist:
-                continue
-            if (cur_height - heights[newx,newy]) > 1:
-                continue
-            distances[newx, newy] = distances[x,y] + 1
-            to_check.append((newx, newy))
-
+    distances = calc_steps_to_summit(heights)
     return distances[start]
 
 
 def b(heights):
     """Solve day 12 part 2"""
+    distances = calc_steps_to_summit(heights)
+    return np.min(distances[heights==ord('a')])
+
+
+def calc_steps_to_summit(heights):
     start = tuple(np.argwhere(heights == ord('S'))[0])
     end = tuple(np.argwhere(heights == ord('E'))[0])
     heights[start] = ord('a')
@@ -55,18 +38,14 @@ def b(heights):
         cur_height = heights[x, y]
         for dx, dy in neighbors:
             newx, newy = x+dx, y+dy
-            if newx < 0 or newx >= heights.shape[0]:
-                continue
-            if newy < 0 or newy >= heights.shape[1]:
-                continue
-            if distances[newx, newy] != max_dist:
-                continue
-            if (cur_height - heights[newx,newy]) > 1:
+            if (newx < 0 or newx >= heights.shape[0])\
+                    or (newy < 0 or newy >= heights.shape[1])\
+                    or (distances[newx, newy] != max_dist)\
+                    or ((cur_height - heights[newx,newy]) > 1):
                 continue
             distances[newx, newy] = distances[x,y] + 1
             to_check.append((newx, newy))
-
-    return np.min(distances[heights==ord('a')])
+    return distances
 
 
 def parse_file(f: Path):

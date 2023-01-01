@@ -52,7 +52,8 @@ class MonkeyMath:
 
         if monkey == 'root':
             result = (result_a, '=', result_b)
-        elif isinstance(result_a, tuple) or isinstance(result_b, tuple) or 'humn' in [result_a, result_b]:
+        elif isinstance(result_a, tuple) or isinstance(result_b, tuple)\
+                or 'humn' in [result_a, result_b]:
             result = (result_a, operand, result_b)
         elif operand == '+':
             result = result_a + result_b

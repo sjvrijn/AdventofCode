@@ -1,4 +1,4 @@
-from itertools import count, cycle
+from itertools import cycle
 from pathlib import Path
 
 import matplotlib.pyplot as plt

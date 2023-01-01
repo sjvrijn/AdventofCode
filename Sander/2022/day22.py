@@ -1,9 +1,6 @@
 from enum import IntEnum
 from pathlib import Path
 
-from functools import reduce
-import re
-
 from more_itertools import flatten
 from parse import findall, parse
 import numpy as np

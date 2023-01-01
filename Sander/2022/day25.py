@@ -1,10 +1,4 @@
-from collections import Counter, defaultdict
-from itertools import product
 from pathlib import Path
-
-from more_itertools import chunked
-import numpy as np
-import parse
 
 
 def snafu_to_int(snafu):

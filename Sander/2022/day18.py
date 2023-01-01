@@ -1,11 +1,6 @@
-from collections import Counter, defaultdict
-from itertools import product
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-from more_itertools import chunked
 import numpy as np
-import parse
 
 
 def a(cubes):
@@ -43,7 +38,6 @@ def b(cubes):
     for cube in cubes:
         boulder[cube] = LAVA
 
-    exposed_sides = 0
     expanding_steam = {(0,0,0)}
     while expanding_steam:
         steam = expanding_steam.pop()

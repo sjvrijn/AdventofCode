@@ -73,9 +73,7 @@ class State:
 
 def calc_max_geodes(blueprint, time_left):
     states = [State(blueprint, time_left)]
-    best_state = None
     cur_max_geodes = 0
-
 
     while states:
         state = states.pop(0)
@@ -93,9 +91,7 @@ def calc_max_geodes(blueprint, time_left):
                     cur_max_geodes = new_state.resources[3]
             else:
                 states.insert(0, new_state)
-                # states.append(new_state)
 
-    print(best_state)
     return cur_max_geodes
 
 
@@ -113,17 +109,11 @@ def b(blueprints):
         calc_max_geodes(blueprint, 32)
         for blueprint in blueprints[:3]
     ]
-    # wrong answer: 437976
     return math.prod(sorted(max_geodes)[-3:])
 
 
 def parse_file(f: Path):
     """Parse the input file into relevant data structure"""
-    # Blueprint 1:
-    #   Each ore robot costs 4 ore.
-    #   Each clay robot costs 2 ore.
-    #   Each obsidian robot costs 3 ore and 14 clay.
-    #   Each geode robot costs 2 ore and 7 obsidian.
     template_single = parse.compile("{type1} robot costs {ore:d} ore.")
     template_double = parse.compile("{type1} robot costs {:d} ore and {:d}{type2}")
     lines = f.read_text().splitlines()
@@ -136,8 +126,6 @@ def parse_file(f: Path):
             'obsidian': (*template_double.parse(obsidian).fixed, 0, 0),
             'geode': (template_double.parse(geode)[0], 0, template_double.parse(geode)[1], 0)
         })
-
-    # pprint(blueprints)
     return blueprints
 
 

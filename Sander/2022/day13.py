@@ -40,8 +40,6 @@ def b(packets):
     div1, div2 = [[2]], [[6]]
     packets.extend([div1, div2])
     packets.sort(key=cmp_to_key(are_in_right_order))
-    # for p in packets:
-    #     print(p)
     return (packets.index(div1)+1) * (packets.index(div2)+1)
 
 

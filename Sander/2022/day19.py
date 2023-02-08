@@ -58,7 +58,7 @@ class State:
             resources = self.harvest(resources)
             minutes_left -= 1
             if minutes_left == 1:
-                resources = self.harvest(self.resources)
+                resources = self.harvest(resources)
                 return State(self.blueprint, 0, resources, self.robots, self.max_robots)
 
         resources = tuple(r-c for r, c in zip(resources, cost))

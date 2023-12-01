@@ -1,0 +1,13 @@
+name = "AdventofCode"
+uuid = "d902f3c8-3250-4c0c-8c04-213febbfc1eb"
+authors = ["Sander van Rijn <mail@svrijn.nl>"]
+version = "0.0.1"
+
+[deps]
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

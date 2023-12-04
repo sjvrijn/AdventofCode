@@ -14,13 +14,6 @@ function b(data)
         prod(maximum(reduce(hcat, game_set), dims=2))
         for game_set in data
     )
-    # total = 0
-    # for game_set in data
-    #     power = prod(maximum(reduce(hcat, game_set), dims=2))
-    #     println("$power : $game_set")
-    #     total += power
-    # end
-
     return total
 end
 

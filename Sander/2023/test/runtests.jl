@@ -1,4 +1,4 @@
-using AdventofCode
+using AdventofCode: day01, day02, day03, day04
 using Test
 
 const INPUT = joinpath(@__DIR__, "../inputs")
@@ -12,7 +12,7 @@ const INPUT = joinpath(@__DIR__, "../inputs")
         )
         for (file, result) in testfiles
             data = readlines(joinpath(INPUT, file))
-            @test AdventofCode.day01.a(data) == result
+            @test day01.a(data) == result
         end
     end
 
@@ -23,7 +23,7 @@ const INPUT = joinpath(@__DIR__, "../inputs")
         )
         for (file, result) in testfiles
             data = readlines(joinpath(INPUT, file))
-            @test AdventofCode.day01.b(data) == result
+            @test day01.b(data) == result
         end
     end
 
@@ -36,8 +36,8 @@ end
             "input02-test1.txt" => 8,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day02.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day02.a(data) == result
+            data = day02.parse_file(joinpath(INPUT, file))
+            @test day02.a(data) == result
         end
     end
 
@@ -46,8 +46,8 @@ end
             "input02-test1.txt" => 2286,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day02.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day02.b(data) == result
+            data = day02.parse_file(joinpath(INPUT, file))
+            @test day02.b(data) == result
         end
     end
 
@@ -60,8 +60,8 @@ end
             "input03-test1.txt" => 4361,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day03.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day03.a(data) == result
+            data = day03.parse_file(joinpath(INPUT, file))
+            @test day03.a(data) == result
         end
     end
 
@@ -70,8 +70,8 @@ end
             "input03-test1.txt" => 467835,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day03.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day03.b(data) == result
+            data = day03.parse_file(joinpath(INPUT, file))
+            @test day03.b(data) == result
         end
     end
 
@@ -84,8 +84,8 @@ end
             "input04-test1.txt" => 13,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day04.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day04.a(data) == result
+            data = day04.parse_file(joinpath(INPUT, file))
+            @test day04.a(data) == result
         end
     end
 
@@ -94,8 +94,8 @@ end
             "input04-test1.txt" => 30,
         )
         for (file, result) in testfiles
-            data = AdventofCode.day04.parse_file(joinpath(INPUT, file))
-            @test AdventofCode.day04.b(data) == result
+            data = day04.parse_file(joinpath(INPUT, file))
+            @test day04.b(data) == result
         end
     end
 

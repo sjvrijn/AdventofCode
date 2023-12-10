@@ -2,7 +2,7 @@ using Test
 
 const INPUT = joinpath(@__DIR__, "../inputs")
 
-tests = 1:5
+tests = 1:6
 if !isempty(ARGS)
 	tests = ARGS  # Set list to same as command line args
 end

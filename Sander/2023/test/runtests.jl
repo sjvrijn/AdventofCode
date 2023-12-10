@@ -2,28 +2,11 @@ using Test
 
 const INPUT = joinpath(@__DIR__, "../inputs")
 
-include("test-day01.jl")
-include("test-day02.jl")
-include("test-day03.jl")
-include("test-day04.jl")
-# include("test-day05.jl")
-# include("test-day06.jl")
-# include("test-day07.jl")
-# include("test-day08.jl")
-# include("test-day09.jl")
-# include("test-day10.jl")
-# include("test-day11.jl")
-# include("test-day12.jl")
-# include("test-day13.jl")
-# include("test-day14.jl")
-# include("test-day15.jl")
-# include("test-day16.jl")
-# include("test-day17.jl")
-# include("test-day18.jl")
-# include("test-day19.jl")
-# include("test-day20.jl")
-# include("test-day21.jl")
-# include("test-day22.jl")
-# include("test-day23.jl")
-# include("test-day24.jl")
-# include("test-day25.jl")
+tests = 1:5
+if !isempty(ARGS)
+	tests = ARGS  # Set list to same as command line args
+end
+
+for t in tests
+    include("test-day$(lpad(t,2,'0')).jl")
+end

@@ -2,3 +2,4 @@ matplotlib
 more-itertools
 numpy
 parse
+pyprojroot

@@ -13,14 +13,35 @@ def a(instructions):
 
 def b(instructions):
     """Solve day 2 part 2"""
-    mul = r"mul\((\d+),(\d+)\)"
+    #    r"         # use a raw string to avoid having to do extra 'escaping' (https://docs.python.org/3/reference/lexical_analysis.html#escape-sequences)
+    #      do       # match the text "do"
+    #        \(     # match an open bracket '('
+    #          \)   # match a closing bracket ')'
+    #            "  # end the string
     do = r"do\(\)"
+    #      r"            # use a raw string
+    #        don't       # match the text "don't"
+    #             \(\)   # match the open and close brackets ()
+    #                 "  # end the string
     dont = r"don\'t\(\)"
+    #     r"                     # use a raw string
+    #       mul\(                # match the text "mul("
+    #            (               # open a 'group' so we can extract the value from it
+    #             \d+            # \d means a digit [0-9], and + means 1 or more of them sequentially
+    #                )           # close the group, so match only the aforementioned set of digits
+    #                 ,          # match a plain comma ","
+    #                  (\d+)     # open and match another group searching for a set of digits (see above)
+    #                       \)   # match a closing bracket ")"
+    #                         "  # end the string
+    mul = r"mul\((\d+),(\d+)\)"
 
+    # "|" means 'or', so if we have three smaller expressions A, B and C,  r"A|B|C" will match any one of them
     all_patterns = r"|".join([mul, do, dont])
 
     sum_multiplications = 0
     do_mul = True
+
+    # `re.findall()` would only return the matched strings, but we still want to access the matched groups
     for match in re.finditer(all_patterns, instructions):
         if match.group(0) == "do()":
             do_mul = True

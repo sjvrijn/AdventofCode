@@ -39,12 +39,12 @@ def parse_file(f: Path):
 def main():
     """Main function to wrap variables"""
     files = [
-        here('2024/inputs/input2-test1.txt'),
-        here('2024/inputs/input2.txt'),
+        'Sander/2024/inputs/input2-test1.txt',
+        'Sander/2024/inputs/input2.txt',
     ]
     for filename in files:
         print(filename)
-        reports = parse_file(Path(filename))
+        reports = parse_file(here(filename))
 
         print(f'A: {a(reports)}')
         print(f'B: {b(reports)}')

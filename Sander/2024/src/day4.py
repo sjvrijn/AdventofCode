@@ -78,12 +78,12 @@ def parse_file(f: Path):
 def main():
     """Main function to wrap variables"""
     files = [
-        here('Sander/2024/inputs/input4-test1.txt'),
-        here('Sander/2024/inputs/input4.txt'),
+        'Sander/2024/inputs/input4-test1.txt',
+        'Sander/2024/inputs/input4.txt',
     ]
     for filename in files:
         print(filename)
-        word_search = parse_file(Path(filename))
+        word_search = parse_file(here(filename))
 
         print(f'A: {a(word_search)}')
         print(f'B: {b(word_search)}')

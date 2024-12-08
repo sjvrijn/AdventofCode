@@ -6,13 +6,13 @@ from pyprojroot import here
 
 
 def a(instructions):
-    """Solve day 2 part 1"""
+    """Solve day 3 part 1"""
     template = "mul({a:d},{b:d})"
     return sum(match["a"]*match["b"] for match in parse.findall(template, instructions))
 
 
 def b(instructions):
-    """Solve day 2 part 2"""
+    """Solve day 3 part 2"""
     #    r"         # use a raw string to avoid having to do extra 'escaping' (https://docs.python.org/3/reference/lexical_analysis.html#escape-sequences)
     #      do       # match the text "do"
     #        \(     # match an open bracket '('
@@ -66,13 +66,13 @@ def parse_file(f: Path):
 def main():
     """Main function to wrap variables"""
     files = [
-        here('Sander/2024/inputs/input3-test1.txt'),
-        here('Sander/2024/inputs/input3-test2.txt'),
-        here('Sander/2024/inputs/input3.txt'),
+        'Sander/2024/inputs/input3-test1.txt',
+        'Sander/2024/inputs/input3-test2.txt',
+        'Sander/2024/inputs/input3.txt',
     ]
     for filename in files:
         print(filename)
-        instructions = parse_file(Path(filename))
+        instructions = parse_file(here(filename))
 
         print(f'A: {a(instructions)}')
         print(f'B: {b(instructions)}')

@@ -28,8 +28,8 @@ def parse_file(f: Path):
 def main():
     """Main function to wrap variables"""
     files = [
-        '2024/inputs/input1-test1.txt',
-        '2024/inputs/input1.txt',
+        'Sander/2024/inputs/input1-test1.txt',
+        'Sander/2024/inputs/input1.txt',
     ]
     for filename in files:
         print(filename)
